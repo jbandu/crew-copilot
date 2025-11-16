@@ -16,7 +16,6 @@ from datetime import datetime
 from decimal import Decimal
 
 from anthropic import Anthropic
-from openai import OpenAI
 from pydantic import BaseModel
 
 
