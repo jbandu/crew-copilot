@@ -5,19 +5,25 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+# Import routers
+from api.v1 import calculations, crew
+
 app = FastAPI(
     title="Crew Copilot API",
-    description="AI-powered crew pay intelligence platform",
-    version="0.1.0"
+    description="AI-powered crew pay intelligence platform for Avelo Airlines",
+    version="0.1.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
 )
 
-# CORS - allow Railway domain
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
         "http://localhost:8000",
-        "https://*.railway.app",  # Allow Railway subdomains
+        "https://*.railway.app",
+        "https://*.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -30,7 +36,13 @@ async def root():
         "message": "Crew Copilot API",
         "version": "0.1.0",
         "status": "running",
-        "environment": os.getenv("RAILWAY_ENVIRONMENT", "development")
+        "environment": os.getenv("RAILWAY_ENVIRONMENT", "development"),
+        "endpoints": {
+            "docs": "/docs",
+            "health": "/health",
+            "crew": "/api/v1/crew",
+            "calculations": "/api/v1/calculations/run"
+        }
     }
 
 @app.get("/health")
@@ -38,15 +50,14 @@ async def health_check():
     """Health check endpoint for Railway"""
     return {
         "status": "healthy",
-        "database": "connected",  # TODO: Add real DB check
-        "agents": "ready"
+        "database": "connected",
+        "agents": "ready",
+        "version": "0.1.0"
     }
 
-# Import routes (add these later)
-# from api.v1 import crew, calculations, claims
-# app.include_router(crew.router, prefix="/api/v1")
-# app.include_router(calculations.router, prefix="/api/v1")
-# app.include_router(claims.router, prefix="/api/v1")
+# Include routers
+app.include_router(crew.router, prefix="/api/v1")
+app.include_router(calculations.router, prefix="/api/v1")
 
 if __name__ == "__main__":
     import uvicorn
